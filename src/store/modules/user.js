@@ -17,12 +17,14 @@ const state = {
   accessToken: getAccessToken(),
   username: '',
   avatar: '',
+  roles: [],
   permissions: [],
 }
 const getters = {
   accessToken: (state) => state.accessToken,
   username: (state) => state.username,
   avatar: (state) => state.avatar,
+  roles: (state) => state.roles,
   permissions: (state) => state.permissions,
 }
 const mutations = {
@@ -36,6 +38,9 @@ const mutations = {
   setAvatar(state, avatar) {
     state.avatar = avatar
   },
+  setRoles(state, roles) {
+    state.roles = roles
+  },
   setPermissions(state, permissions) {
     state.permissions = permissions
   },
@@ -45,8 +50,15 @@ const actions = {
     commit('setPermissions', permissions)
   },
   async login({ commit }, userInfo) {
-    const { data } = await login(userInfo)
-    const accessToken = data[tokenName]
+    const { username, password } = userInfo
+    var formdata = new FormData()
+    formdata.append('client_id', 'javaboy')
+    formdata.append('client_secret', '123')
+    formdata.append('username', username)
+    formdata.append('password', password)
+    formdata.append('grant_type', 'password')
+    const { access_token } = await login(formdata)
+    const accessToken = access_token
     if (accessToken) {
       commit('setAccessToken', accessToken)
       const hour = new Date().getHours()
@@ -69,24 +81,45 @@ const actions = {
     }
   },
   async getUserInfo({ commit, state }) {
-    const { data } = await getUserInfo(state.accessToken)
-    if (!data) {
+    const { username, roleList } = await getUserInfo()
+    if (!username) {
       Vue.prototype.$baseMessage('验证失败，请重新登录...', 'error')
       return false
     }
-    let { permissions, username, avatar } = data
-    if (permissions && username && Array.isArray(permissions)) {
-      commit('setPermissions', permissions)
-      commit('setUsername', username)
-      commit('setAvatar', avatar)
-      return permissions
+    let permissions = []
+    if (username && roleList && Array.isArray(roleList)) {
+      if (
+        roleList.findIndex((o) => {
+          return o.name == 'ROLE_ADMIN'
+        }) > -1
+      ) {
+        permissions = ['admin']
+        commit('setPermissions', permissions)
+        commit('setRoles', roleList)
+        commit('setUsername', username)
+        commit('setAvatar', '')
+        return permissions
+      } else {
+        Vue.prototype.$baseMessage('用户信息接口异常', 'error')
+        return false
+      }
     } else {
       Vue.prototype.$baseMessage('用户信息接口异常', 'error')
       return false
     }
+    // let { permissions, username, avatar } = data
+    // if (permissions && username && Array.isArray(permissions)) {
+    //   commit('setPermissions', permissions)
+    //   commit('setUsername', username)
+    //   commit('setAvatar', avatar)
+    //   return permissions
+    // } else {
+    //   Vue.prototype.$baseMessage('用户信息接口异常', 'error')
+    //   return false
+    // }
   },
   async logout({ dispatch }) {
-    await logout(state.accessToken)
+    // await logout(state.accessToken)
     await dispatch('resetAccessToken')
     await resetRouter()
   },

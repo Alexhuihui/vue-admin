@@ -1,6 +1,11 @@
+<!--
+ * @Author: chenyuechen
+ * @Date: 2020-11-19 17:52:31
+ * @Description: 
+-->
 <template>
   <div v-if="routerView" class="app-main-container">
-    <vab-github-corner />
+    <!-- <vab-github-corner /> -->
     <transition mode="out-in" name="fade-transform">
       <keep-alive :include="cachedRoutes" :max="keepAliveMaxNum">
         <router-view :key="key" class="app-main-height" />
@@ -9,7 +14,7 @@
     <footer v-show="footerCopyright" class="footer-copyright">
       Copyright
       <vab-icon :icon="['fas', 'copyright']"></vab-icon>
-      xxx-项目 {{ fullYear }}
+      后台管理系统 {{ fullYear }}
     </footer>
   </div>
 </template>

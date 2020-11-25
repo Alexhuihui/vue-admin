@@ -1,3 +1,8 @@
+/*
+ * @Author: chenyuechen
+ * @Date: 2020-11-19 17:52:31
+ * @Description:
+ */
 /**
  * @author chuzhixin 1204505056@qq.com （不想保留author可删除）
  * @description 路由拦截状态管理，目前两种模式：all模式与intelligence模式，其中partialRoutes是菜单暂未使用
@@ -33,9 +38,10 @@ const actions = {
     return finallyAsyncRoutes
   },
   async setAllRoutes({ commit }) {
-    let { data } = await getRouterList()
-    data.push({ path: '*', redirect: '/404', hidden: true })
-    let accessRoutes = convertRouter(data)
+    // let { data } = await getRouterList()
+    // data.push({ path: '*', redirect: '/404', hidden: true })
+    // let accessRoutes = convertRouter(data)
+    let accessRoutes = asyncRoutes
     commit('setAllRoutes', accessRoutes)
     return accessRoutes
   },

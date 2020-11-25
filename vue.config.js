@@ -54,7 +54,18 @@ module.exports = {
       warnings: true,
       errors: true,
     },
-    after: mockServer(),
+    proxy: {
+      '/api': {
+        target: 'https://blog.alexmmd.top/api', // 代理的目标IP地址
+        changeOrigin: true, // 是否将主机头的源更改为目标URL
+        // ws: true, // 是否代理websocket
+        // secure: false, // 是否验证SSL证书
+        pathRewrite: {
+          '^/api': '',
+        },
+      },
+    },
+    // after: mockServer(),
   },
   configureWebpack() {
     return {

@@ -53,14 +53,14 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     if (store.getters['user/accessToken']) {
-      config.headers[tokenName] = store.getters['user/accessToken']
+      config.headers[tokenName] = `Bearer${store.getters['user/accessToken']}`
     }
     //这里会过滤所有为空、0、false的key，如果不需要请自行注释
-    if (config.data)
-      config.data = Vue.prototype.$baseLodash.pickBy(
-        config.data,
-        Vue.prototype.$baseLodash.identity
-      )
+    // if (config.data)
+    //   config.data = Vue.prototype.$baseLodash.pickBy(
+    //     config.data,
+    //     Vue.prototype.$baseLodash.identity
+    //   )
     if (
       config.data &&
       config.headers['Content-Type'] ===
@@ -82,13 +82,17 @@ instance.interceptors.response.use(
 
     const { data, config } = response
     const { code, msg } = data
+    // 没有code返回的接口
+    if (code == null) {
+      return data
+    }
     // 操作正常Code数组
     const codeVerificationArray = isArray(successCode)
       ? [...successCode]
       : [...[successCode]]
     // 是否操作正常
     if (codeVerificationArray.includes(code)) {
-      return data
+      return data.data
     } else {
       handleCode(code, msg)
       return Promise.reject(

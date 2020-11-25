@@ -1,3 +1,8 @@
+/*
+ * @Author: chenyuechen
+ * @Date: 2020-11-19 17:52:31
+ * @Description:
+ */
 /**
  * @description 导出默认网路配置
  **/
@@ -7,12 +12,12 @@ const network = {
   //消息框消失时间
   messageDuration: 3000,
   //最长请求时间
-  requestTimeout: 5000,
+  requestTimeout: 60000,
   //操作正常code，支持String、Array、int多种类型
-  successCode: [200, 0],
+  successCode: [100, 101],
   //登录失效code
-  invalidCode: 402,
+  invalidCode: 401,
   //无权限code
-  noPermissionCode: 401,
+  noPermissionCode: 402,
 }
 module.exports = network
