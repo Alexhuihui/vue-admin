@@ -1,38 +1,39 @@
 <template>
-  <div class="roleManagement-container">
-    <el-divider content-position="left">
-      演示环境仅做基础功能展示，若想实现不同角色的真实菜单配置，需将settings.js路由加载模式改为all模式，由后端全面接管路由渲染与权限控制
-    </el-divider>
+  <div class="itemManagement-container">
     <vab-query-form>
       <vab-query-form-left-panel :span="12">
         <el-button icon="el-icon-plus" type="primary" @click="handleEdit">
           添加
         </el-button>
-        <el-button icon="el-icon-delete" type="danger" @click="handleDelete">
-          批量删除
+        <el-button
+          icon="el-icon-message"
+          type="primary"
+          @click="handleSendEmail"
+        >
+          发送更新邮件
         </el-button>
       </vab-query-form-left-panel>
       <vab-query-form-right-panel :span="12">
         <el-form :inline="true" :model="queryForm" @submit.native.prevent>
           <el-form-item>
             <el-input
-              v-model.trim="queryForm.permission"
-              placeholder="请输入查询条件"
+              v-model.trim="queryForm.itemName"
+              placeholder="请输入商品名称"
               clearable
             />
           </el-form-item>
-          <el-form-item>
+          <!-- <el-form-item>
             <el-button icon="el-icon-search" type="primary" @click="queryData">
               查询
             </el-button>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
       </vab-query-form-right-panel>
     </vab-query-form>
 
     <el-table
       v-loading="listLoading"
-      :data="list"
+      :data="tableList"
       :element-loading-text="elementLoadingText"
       @selection-change="setSelectRows"
     >
@@ -44,8 +45,24 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="permission"
-        label="权限码"
+        prop="itemName"
+        label="商品名称"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="catName"
+        label="商品类别"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="sellCounts"
+        label="销售数量"
+      ></el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        prop="updateTime"
+        label="修改时间"
+        :formatter="dateFormatter"
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
@@ -64,19 +81,22 @@
       @current-change="handleCurrentChange"
     ></el-pagination>
     <edit ref="edit" @fetch-data="fetchData"></edit>
+    <sendEmail ref="sendEmail" @fetch-data="fetchData"></sendEmail>
   </div>
 </template>
 
 <script>
-  import { getList, doDelete } from '@/api/roleManagement'
-  import Edit from './components/RoleManagementEdit'
+  import { getList, doDelete } from '@/api/itemManagement'
+  import Edit from './components/ItemManagementEdit'
+  import SendEmail from './components/SendEmail'
+  import { parseTime } from '@/utils'
 
   export default {
-    name: 'RoleManagement',
-    components: { Edit },
+    name: 'ItemManagement',
+    components: { Edit, SendEmail },
     data() {
       return {
-        list: null,
+        list: [],
         listLoading: true,
         layout: 'total, sizes, prev, pager, next, jumper',
         total: 0,
@@ -85,9 +105,26 @@
         queryForm: {
           pageNo: 1,
           pageSize: 10,
-          permission: '',
+          itemName: '',
         },
       }
+    },
+    computed: {
+      tableList() {
+        var vm = this
+        var arrList
+        arrList = vm.list.filter((o) => {
+          var b1 =
+            !vm.queryForm.itemName ||
+            o.itemName.indexOf(vm.queryForm.itemName) > -1
+          return b1
+        })
+        vm.total = arrList.length
+        return arrList.slice(
+          (vm.queryForm.pageNo - 1) * vm.queryForm.pageSize,
+          vm.queryForm.pageNo * vm.queryForm.pageSize
+        )
+      },
     },
     created() {
       this.fetchData()
@@ -103,11 +140,13 @@
           this.$refs['edit'].showEdit()
         }
       },
+      handleSendEmail() {
+        this.$refs['sendEmail'].showSendEmail()
+      },
       handleDelete(row) {
         if (row.id) {
           this.$baseConfirm('你确定要删除当前项吗', null, async () => {
-            const { msg } = await doDelete({ ids: row.id })
-            this.$baseMessage(msg, 'success')
+            await doDelete(row.id)
             this.fetchData()
           })
         } else {
@@ -136,14 +175,19 @@
         this.queryForm.pageNo = 1
         this.fetchData()
       },
-      async fetchData() {
+      fetchData() {
         this.listLoading = true
-        const { data, totalCount } = await getList(this.queryForm)
-        this.list = data
-        this.total = totalCount
-        setTimeout(() => {
-          this.listLoading = false
-        }, 300)
+        getList({})
+          .then((res) => {
+            this.list = res || []
+            this.listLoading = false
+          })
+          .catch(() => {
+            this.listLoading = false
+          })
+      },
+      dateFormatter(row, column, cellValue, index) {
+        return parseTime(cellValue, '{y}/{m}/{d} {h}:{i}:{s}')
       },
     },
   }

@@ -18,6 +18,6 @@ const network = {
   //登录失效code
   invalidCode: 401,
   //无权限code
-  noPermissionCode: 402,
+  noPermissionCode: 403,
 }
 module.exports = network

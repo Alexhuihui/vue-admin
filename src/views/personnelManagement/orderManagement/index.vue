@@ -1,30 +1,20 @@
 <template>
-  <div class="userManagement-container">
+  <div class="orderManagement-container">
     <vab-query-form>
       <vab-query-form-left-panel :span="12">
         <el-button icon="el-icon-plus" type="primary" @click="handleEdit">
           添加
         </el-button>
-        <!-- <el-button icon="el-icon-delete" type="danger" @click="handleDelete">
-          批量删除
-        </el-button> -->
       </vab-query-form-left-panel>
       <vab-query-form-right-panel :span="12">
         <el-form :inline="true" :model="queryForm" @submit.native.prevent>
           <el-form-item>
             <el-input
-              v-model.trim="queryForm.username"
-              placeholder="请输入用户名或者邮箱"
+              v-model.trim="queryForm.itemName"
+              placeholder="请输入收件人信息"
               clearable
             />
           </el-form-item>
-          <!-- <el-form-item>
-            <el-input
-              v-model.trim="queryForm.email"
-              placeholder="请输入用户邮箱"
-              clearable
-            />
-          </el-form-item> -->
           <!-- <el-form-item>
             <el-button icon="el-icon-search" type="primary" @click="queryData">
               查询
@@ -48,15 +38,19 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="username"
-        label="用户名"
+        prop="userId"
+        label="用户名称"
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="email"
-        label="邮箱"
+        prop="receiverName"
+        label="收件人名称"
       ></el-table-column>
-
+      <el-table-column
+        show-overflow-tooltip
+        prop="receiverMobile"
+        label="收件人手机号"
+      ></el-table-column>
       <el-table-column
         show-overflow-tooltip
         prop="updateTime"
@@ -65,6 +59,7 @@
       ></el-table-column>
       <el-table-column show-overflow-tooltip label="操作" width="200">
         <template #default="{ row }">
+          <el-button type="text" @click="handleDetail(row)">详情</el-button>
           <el-button type="text" @click="handleEdit(row)">编辑</el-button>
           <el-button type="text" @click="handleDelete(row)">删除</el-button>
         </template>
@@ -72,23 +67,27 @@
     </el-table>
     <el-pagination
       background
-      :current-page.sync="queryForm.pageNo"
-      :page-size.sync="queryForm.pageSize"
+      :current-page="queryForm.pageNo"
+      :page-size="queryForm.pageSize"
       :layout="layout"
       :total="total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
     ></el-pagination>
     <edit ref="edit" @fetch-data="fetchData"></edit>
+    <detail ref="detail" @fetch-data="fetchData"></detail>
   </div>
 </template>
 
 <script>
-  import { getList, doDelete } from '@/api/userManagement'
-  import Edit from './components/UserManagementEdit'
+  import { getList, doDelete } from '@/api/orderManagement'
+  import Edit from './components/OrderManagementEdit'
+  import Detail from './components/OrderDetail'
   import { parseTime } from '@/utils'
 
   export default {
-    name: 'UserManagement',
-    components: { Edit },
+    name: 'OrderManagement',
+    components: { Edit, Detail },
     data() {
       return {
         list: [],
@@ -100,8 +99,7 @@
         queryForm: {
           pageNo: 1,
           pageSize: 10,
-          username: '',
-          email: '',
+          itemName: '',
         },
       }
     },
@@ -111,9 +109,8 @@
         var arrList
         arrList = vm.list.filter((o) => {
           var b1 =
-            !vm.queryForm.username ||
-            o.username.indexOf(vm.queryForm.username) > -1 ||
-            o.email.indexOf(vm.queryForm.username) > -1
+            !vm.queryForm.itemName ||
+            o.itemName.indexOf(vm.queryForm.itemName) > -1
           return b1
         })
         vm.total = arrList.length
@@ -129,6 +126,9 @@
     methods: {
       setSelectRows(val) {
         this.selectRows = val
+      },
+      handleDetail(row) {
+        this.$refs['detail'].showDetail(row)
       },
       handleEdit(row) {
         if (row.id) {
@@ -157,14 +157,14 @@
           }
         }
       },
-      // handleSizeChange(val) {
-      //   this.queryForm.pageSize = val
-      //   this.fetchData()
-      // },
-      // handleCurrentChange(val) {
-      //   this.queryForm.pageNo = val
-      //   this.fetchData()
-      // },
+      handleSizeChange(val) {
+        this.queryForm.pageSize = val
+        this.fetchData()
+      },
+      handleCurrentChange(val) {
+        this.queryForm.pageNo = val
+        this.fetchData()
+      },
       queryData() {
         this.queryForm.pageNo = 1
         this.fetchData()

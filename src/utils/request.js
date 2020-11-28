@@ -92,6 +92,9 @@ instance.interceptors.response.use(
       : [...[successCode]]
     // 是否操作正常
     if (codeVerificationArray.includes(code)) {
+      if (code == 101) {
+        Vue.prototype.$baseMessage(msg || `操作成功`, 'success')
+      }
       return data.data
     } else {
       handleCode(code, msg)
