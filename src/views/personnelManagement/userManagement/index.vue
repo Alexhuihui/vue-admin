@@ -5,6 +5,13 @@
         <el-button icon="el-icon-plus" type="primary" @click="handleEdit">
           添加
         </el-button>
+        <el-button
+          icon="el-icon-message"
+          type="primary"
+          @click="handleSendEmail"
+        >
+          发送通知邮件
+        </el-button>
         <!-- <el-button icon="el-icon-delete" type="danger" @click="handleDelete">
           批量删除
         </el-button> -->
@@ -78,17 +85,19 @@
       :total="total"
     ></el-pagination>
     <edit ref="edit" @fetch-data="fetchData"></edit>
+    <sendEmail ref="sendEmail" @fetch-data="fetchData"></sendEmail>
   </div>
 </template>
 
 <script>
   import { getList, doDelete } from '@/api/userManagement'
   import Edit from './components/UserManagementEdit'
+  import SendEmail from './components/SendEmail'
   import { parseTime } from '@/utils'
 
   export default {
     name: 'UserManagement',
-    components: { Edit },
+    components: { Edit, SendEmail },
     data() {
       return {
         list: [],
@@ -136,6 +145,9 @@
         } else {
           this.$refs['edit'].showEdit()
         }
+      },
+      handleSendEmail() {
+        this.$refs['sendEmail'].showSendEmail()
       },
       handleDelete(row) {
         if (row.id) {

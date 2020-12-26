@@ -1,24 +1,14 @@
 <template>
   <el-dialog
-    title="发送更新邮件"
+    title="发送通知邮件"
     :visible.sync="dialogFormVisible"
     width="800px"
     @close="close"
   >
     <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-      <el-form-item label="商品名称" prop="itemId">
-        <el-select v-model="form.itemId" placeholder="请选择">
-          <el-option
-            v-for="(item, index) in itemList"
-            :key="index"
-            :value="item.id"
-            :label="item.itemName"
-          ></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="邮件内容" prop="updateContent">
+      <el-form-item label="邮件内容" prop="content">
         <el-input
-          v-model="form.updateContent"
+          v-model="form.content"
           type="textarea"
           autocomplete="off"
         ></el-input>
@@ -38,6 +28,7 @@
     getCatList,
     getList,
     sendUpdateMail,
+    sendNotifyMail,
   } from '@/api/itemManagement'
 
   export default {
@@ -46,30 +37,19 @@
       return {
         form: {
           itemId: '',
-          updateContent: '',
+          content: '',
         },
         rules: {
-          itemId: [
-            { required: true, trigger: 'change', message: '请输入商品名称' },
-          ],
-          updateContent: [
+          content: [
             { required: true, trigger: 'blur', message: '请输入更新内容' },
           ],
         },
-        itemList: [],
         title: '',
         dialogFormVisible: false,
       }
     },
-    created() {
-      this.getSelectList()
-    },
+    created() {},
     methods: {
-      getSelectList() {
-        getList({}).then((res) => {
-          this.itemList = res || []
-        })
-      },
       showSendEmail() {
         this.dialogFormVisible = true
       },
@@ -81,7 +61,7 @@
       save() {
         this.$refs['form'].validate(async (valid) => {
           if (valid) {
-            await sendUpdateMail(this.form)
+            await sendNotifyMail(this.form)
             this.$emit('fetch-data')
             this.close()
           } else {

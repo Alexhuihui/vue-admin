@@ -10,7 +10,7 @@
         <el-form :inline="true" :model="queryForm" @submit.native.prevent>
           <el-form-item>
             <el-input
-              v-model.trim="queryForm.itemName"
+              v-model.trim="queryForm.userName"
               placeholder="请输入收件人信息"
               clearable
             />
@@ -38,7 +38,7 @@
       ></el-table-column>
       <el-table-column
         show-overflow-tooltip
-        prop="userId"
+        prop="userName"
         label="用户名称"
       ></el-table-column>
       <el-table-column
@@ -99,7 +99,9 @@
         queryForm: {
           pageNo: 1,
           pageSize: 10,
-          itemName: '',
+          receiverName: '',
+          userName: '',
+          receiverMobile: '',
         },
       }
     },
@@ -109,8 +111,10 @@
         var arrList
         arrList = vm.list.filter((o) => {
           var b1 =
-            !vm.queryForm.itemName ||
-            o.itemName.indexOf(vm.queryForm.itemName) > -1
+            !vm.queryForm.userName ||
+            o.userName.indexOf(vm.queryForm.userName) > -1 ||
+            o.receiverName.indexOf(vm.queryForm.userName) > -1 ||
+            o.receiverMobile.indexOf(vm.queryForm.userName) > -1
           return b1
         })
         vm.total = arrList.length

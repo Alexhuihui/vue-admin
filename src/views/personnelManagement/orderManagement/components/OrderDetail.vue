@@ -2,46 +2,54 @@
   <el-dialog
     :title="title"
     :visible.sync="dialogFormVisible"
-    width="500px"
+    width="800px"
     @close="close"
   >
-    <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-      <el-form-item label="商品名称" prop="itemName">
-        <el-input v-model="form.itemName" autocomplete="off"></el-input>
+    <el-form ref="form" :model="form" label-width="120px">
+      <el-form-item label="订单总价格:">
+        {{ form.totalAmount }}
       </el-form-item>
-      <el-form-item label="商品内容" prop="content">
-        <el-input v-model="form.content" autocomplete="off"></el-input>
+      <el-form-item label="实际支付总价格:">
+        {{ form.realPayAmount }}
       </el-form-item>
-      <el-form-item label="基础类别" prop="rootCatId">
-        <el-select v-model="form.rootCatId">
-          <el-option
-            v-for="(item, index) in rootCatIdList"
-            :key="index"
-            :value="item.id"
-            :label="item.name"
-          ></el-option>
-        </el-select>
+      <el-form-item label="修改时间:">
+        {{ dateFormatter(form.updateTime) }}
       </el-form-item>
-      <el-form-item label="商品类别" prop="catId">
-        <el-select v-model="form.catId">
-          <el-option
-            v-for="(item, index) in catIdList"
-            :key="index"
-            :value="item.id"
-            :label="item.name"
-          ></el-option>
-        </el-select>
+      <el-form-item label="邮费:">
+        {{ form.postAmount }}
+      </el-form-item>
+      <el-form-item label="收件人名称:">
+        {{ form.receiverName }}
+      </el-form-item>
+      <el-form-item label="收件人手机号:">
+        {{ form.receiverMobile }}
+      </el-form-item>
+      <el-form-item label="收件人地址:">
+        {{ form.receiverAddress }}
+      </el-form-item>
+      <el-form-item label="订单商品列表:">
+        <div
+          v-for="(item, index) in form.orderItemsVoList"
+          :key="index"
+          class=""
+        >
+          <br />
+          商品名称:{{ item.itemName }}
+          <br />
+          购买数量:{{ item.buyCounts }}
+        </div>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="save">确 定</el-button>
+      <!-- <el-button type="primary" @click="save">确 定</el-button> -->
     </div>
   </el-dialog>
 </template>
 
 <script>
   import { doEdit, doAdd, getOrderDetail } from '@/api/orderManagement'
+  import { parseTime } from '@/utils'
 
   export default {
     name: 'OrderManagementEdit',
@@ -53,23 +61,9 @@
           catId: '',
           rootCatId: '',
         },
-        rules: {
-          itemName: [
-            { required: true, trigger: 'blur', message: '请输入商品名称' },
-          ],
-          content: [
-            { required: true, trigger: 'blur', message: '请输入商品内容' },
-          ],
-          catId: [
-            { required: true, trigger: 'change', message: '请输入商品类别' },
-          ],
-          rootCatId: [
-            { required: true, trigger: 'change', message: '请输入基础类别' },
-          ],
-        },
         rootCatIdList: [],
         catIdList: [],
-        title: '',
+        title: '详情',
         dialogFormVisible: false,
       }
     },
@@ -88,7 +82,10 @@
       //   })
       // },
       showDetail(row) {
-        getOrderDetail(row.id)
+        this.dialogFormVisible = true
+        getOrderDetail(row.id).then((res) => {
+          this.form = res
+        })
       },
       showEdit(row) {
         if (!row) {
@@ -115,6 +112,9 @@
             return false
           }
         })
+      },
+      dateFormatter(date) {
+        return parseTime(date, '{y}/{m}/{d} {h}:{i}:{s}')
       },
     },
   }

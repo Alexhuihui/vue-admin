@@ -46,3 +46,19 @@ export function sendUpdateMail(data) {
     data,
   })
 }
+
+export function sendNotifyMail(data) {
+  return request({
+    url: '/novel-subscription-user/admin/magazine/notifyAllMail',
+    method: 'post',
+    data,
+  })
+}
+
+export function getItemList(data) {
+  return request({
+    url: '/novel-subscription-user/admin/magazine/fuzzySearchMagazine',
+    method: 'post',
+    data,
+  })
+}

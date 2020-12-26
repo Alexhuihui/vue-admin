@@ -5,30 +5,33 @@
     width="500px"
     @close="close"
   >
-    <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-      <el-form-item label="商品名称" prop="itemName">
-        <el-input v-model="form.itemName" autocomplete="off"></el-input>
-      </el-form-item>
-      <el-form-item label="商品内容" prop="content">
-        <el-input v-model="form.content" autocomplete="off"></el-input>
-      </el-form-item>
-      <el-form-item label="基础类别" prop="rootCatId">
-        <el-select v-model="form.rootCatId">
+    <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+      <el-form-item label="用户" prop="userId">
+        <el-select v-model="form.userId">
           <el-option
-            v-for="(item, index) in rootCatIdList"
+            v-for="(item, index) in userList"
             :key="index"
             :value="item.id"
-            :label="item.name"
+            :label="item.username"
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="商品类别" prop="catId">
-        <el-select v-model="form.catId">
+      <el-form-item label="收件人姓名" prop="recieveName">
+        <el-input v-model="form.receiverName" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="收件人手机" prop="recieveMobile">
+        <el-input v-model="form.receiverMobile" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="收件人地址" prop="recieveAddress">
+        <el-input v-model="form.receiverAddress" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="商品" prop="item">
+        <el-select v-model="form.itemIdList" multiple placeholder="请选择">
           <el-option
-            v-for="(item, index) in catIdList"
+            v-for="(item, index) in itemList"
             :key="index"
+            :label="item.itemName"
             :value="item.id"
-            :label="item.name"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -42,51 +45,60 @@
 
 <script>
   import { doEdit, doAdd, getOrderDetail } from '@/api/orderManagement'
+  import { getList } from '@/api/userManagement'
+  import { getItemList } from '@/api/itemManagement'
 
   export default {
     name: 'OrderManagementEdit',
     data() {
       return {
         form: {
-          itemName: '',
-          content: '',
-          catId: '',
-          rootCatId: '',
+          userId: '',
+          receiverName: '',
+          receiverMobile: '',
+          receiverAddress: '',
+          totalAmount: '',
+          realPayAmount: '',
+          postAmount: 0,
+          payMethod: 1,
+          itemIdList: [],
         },
         rules: {
-          itemName: [
-            { required: true, trigger: 'blur', message: '请输入商品名称' },
+          receiverName: [
+            { required: true, trigger: 'blur', message: '请输入收件人姓名' },
           ],
-          content: [
-            { required: true, trigger: 'blur', message: '请输入商品内容' },
+          receiverMobile: [
+            { required: true, trigger: 'blur', message: '请输入收件人手机' },
           ],
-          catId: [
-            { required: true, trigger: 'change', message: '请输入商品类别' },
+          receiverAddress: [
+            { required: true, trigger: 'blur', message: '请输入收件人地址' },
           ],
-          rootCatId: [
-            { required: true, trigger: 'change', message: '请输入基础类别' },
+          userId: [
+            { required: true, trigger: 'change', message: '请选择用户' },
           ],
+          // item: [{ required: true, trigger: 'change', message: '请选择商品' }],
         },
-        rootCatIdList: [],
-        catIdList: [],
+        userList: [],
+        itemList: [],
         title: '',
         dialogFormVisible: false,
       }
     },
     created() {
-      // this.getSelectList()
+      this.getSelectList()
+      this.getItemList()
     },
     methods: {
-      // getSelectList() {
-      //   getCatList({}).then((res) => {
-      //     this.rootCatIdList = res.filter((o) => {
-      //       return o.fatherId == 0
-      //     })
-      //     this.catIdList = res.filter((o) => {
-      //       return o.fatherId != 0
-      //     })
-      //   })
-      // },
+      getSelectList() {
+        getList({}).then((res) => {
+          this.userList = res || []
+        })
+      },
+      getItemList() {
+        getItemList({}).then((res) => {
+          this.itemList = res || []
+        })
+      },
       showEdit(row) {
         if (!row) {
           this.title = '添加'
